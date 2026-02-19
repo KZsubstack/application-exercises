@@ -1,6 +1,6 @@
 ---
 title: "AE 01 - UN Votes"
-author: "Your Name"
+author: "Kaden Zhu"
 date: "`r Sys.Date()`"
 output: 
   pdf_document:
@@ -159,7 +159,7 @@ unvotes %>%
   nrow()
 ```
 
-**Answer:** There are _____ countries in the dataset.
+**Answer:** There are 200 countries in the dataset.
 
 **Task 1.2:** What are the unique vote options?
 ```{r unique-votes}
@@ -168,7 +168,7 @@ unvotes %>%
   distinct(vote)
 ```
 
-**Answer:** The vote options are: ___, ___, and ___.
+**Answer:** The vote options are: no, yes, and abstain.
 
 **Task 1.3:** What issue categories are included?
 ```{r unique-issues}
@@ -177,8 +177,7 @@ unvotes %>%
   distinct(issue)
 ```
 
-**Answer:** The issue categories are: ___________________________________________
-
+**Answer:** The issue categories are: Human rights,	Economic development, Colonialism, Palestinian conflict, Arms control and disarmament, and Nuclear weapons and nuclear material.
 ---
 
 ## UN Voting Patterns
@@ -236,14 +235,14 @@ unvotes %>%
 
 **Task 2.1:** Describe the overall trend for the United Kingdom on Human Rights issues.
 
-**Your answer:**
+**Your answer:** The overall trend for the United Kingdom on Human Rights issues begins at around 1945 at a level of roughly 30% and remains pretty steady through the 50s and 60s. During the 1970s and early 1980s, the percentage of “Yes” votes declines very slightly, dipping to around 27-29%. From the mid 1980s, the trend gradually increases with a bit of momentum. Throughout the 1990s, the UK’s “Yes” vote percentage rises quite a bit, reaching its peak in the early 2000s at approximately 50–55%. After this peak, the percentage begins to decline somewhat during the 2010s, but it does not fall as low as any time between 1945-1990s. By the late 2010s, it ends up settling at around 37–39%.
 
 ___________________________________________________________________________
 ___________________________________________________________________________
 
 **Task 2.2:** Which country appears most consistent in its voting patterns across all issues? Which appears least consistent?
 
-**Your answer:**
+**Your answer:** The United Kingdom appears most consistent because its voting percentages stay within a smaller range and change slowly over time. The line is more steady compared to the others. The United States appears least consistent because its voting shows sharp drops and big swings across several issues, especially in colonialism and the Palestinian conflict.
 
 ___________________________________________________________________________
 ___________________________________________________________________________
@@ -252,9 +251,9 @@ ___________________________________________________________________________
 
 **Your answer:**
 
-Most similar: _____________________________________________________________
+Most similar: Arms Control and Disarmament because their voting percentages stay relatively close and follow similar trends over time. 
 
-Most different: ___________________________________________________________
+Most different: Palestinian Conflict
 
 ---
 
@@ -268,7 +267,7 @@ We can easily change which countries are being plotted by changing which countri
 ```{r plot-custom-countries, message=FALSE, fig.width=10, fig.height=6, eval = FALSE}
 # Copy the code from above and modify the filter() line
 unvotes %>%
-  filter(country %in% c("___", "___", "___")) %>%  # Change these!
+  filter(country %in% c("Canada", "Mexico", "China")) %>%  # Change these!
   mutate(year = year(date)) %>%
   group_by(country, year, issue) %>%
   summarize(percent_yes = mean(vote == "yes")) %>%
@@ -286,11 +285,11 @@ unvotes %>%
   )
 ```
 
-**Which countries did you choose?** _____, _____, and _____
+**Which countries did you choose?** Canada, Mexico, and China
 
 **Task 3.2:** Describe one interesting pattern you notice in your new plot.
 
-**Your answer:**
+**Your answer:** One interesting pattern I see right away is that China's data starts later than  Canada, Mexico, USA, Turkey, and UKs. On a lot of these issues China's percentage of yes is on the higher end and especially for the palestinian conflict and colonialism china's answers were very steady. Canada’s percentages are more in the middle and show more ups and downs, especially on the Palestinian conflict, where its support drops sharply in later years like the US. Overall, China and Mexico appear more aligned with each other on many issues, and mexico has pretty sharp rises at times when approaching the 80s. Canada shows more variation over time. 
 
 ___________________________________________________________________________
 ___________________________________________________________________________
@@ -304,8 +303,8 @@ ___________________________________________________________________________
 **Hint:** You'll need to add a `filter()` step for the issue, and modify the countries in the first `filter()`.
 ```{r plot-human-rights, message=FALSE, fig.width=10, fig.height=6, eval = FALSE}
 unvotes %>%
-  filter(country %in% c("___", "___", "___", "___", "___")) %>%  # Choose 5 countries
-  filter(issue == "___") %>%  # Filter for Human rights
+  filter(country %in% c("Canada", "Mexico", "China", "United States", "United Kingdom")) %>%  # Choose 5 countries
+  filter(issue == "Human rights") %>%  # Filter for Human rights
   mutate(year = year(date)) %>%
   group_by(country, year) %>%
   summarize(percent_yes = mean(vote == "yes")) %>%
@@ -314,7 +313,7 @@ unvotes %>%
   geom_smooth(method = "loess", se = FALSE) +
   scale_y_continuous(labels = percent) +
   labs(
-    title = "___",  # Update title
+    title = "% of Yes votes for Human Rights",  # Update title
     subtitle = "1946 to 2019",
     y = "% Yes",
     x = "Year",
@@ -324,9 +323,7 @@ unvotes %>%
 
 **Describe what you see:**
 
-___________________________________________________________________________
-___________________________________________________________________________
-
+I see that the North American nations, Canada UK and US are very alligned and have similar answers to Human rights votes they hover generally within the range of 25% to 50% and follow mostly a similar shape besides US being more steadily flat from 1990-2020s. Mexico and China tend to scatter more towards the higher end.
 ---
 
 ## Exercise 5: Calculate Summary Statistics
@@ -334,25 +331,32 @@ ___________________________________________________________________________
 **Task 5.1:** Calculate the overall percentage of "yes" votes for each country across all issues and all years.
 ```{r overall-yes-percent, eval = FALSE}
 country_yes_percent <- unvotes %>%
-  group_by(___) %>%
+  group_by(country) %>%
   summarize(
     total_votes = n(),
-    percent_yes = mean(vote == "___") * 100
+    percent_yes = mean(vote == "yes") * 100
   ) %>%
   arrange(desc(percent_yes))
 
 # View the top 10
 head(country_yes_percent, 10)
+
+tail(country_yes_percent, 4)
+
+
 ```
 
-**Which country has the highest overall percentage of "yes" votes?** _____
 
-**Which has the lowest?** _____
+
+
+**Which country has the highest overall percentage of "yes" votes?** Seychelles
+
+**Which has the lowest?** Zanzibar has the lowest percentage of “yes” votes at 0%. However, this could just be due to a very small number of total votes in the dataset which is only 1, which could make the percentage not representative. For next country with a more substantial sample votes, the United States has the lowest percentages at 20.71%.
 
 **Task 5.2:** Calculate the percentage of "yes" votes by issue, averaged across all countries and all years.
 ```{r issue-yes-percent, eval = FALSE}
 issue_yes_percent <- unvotes %>%
-  group_by(___) %>%
+  group_by(issue) %>%
   summarize(
     percent_yes = mean(vote == "yes") * 100
   ) %>%
@@ -361,9 +365,9 @@ issue_yes_percent <- unvotes %>%
 issue_yes_percent
 ```
 
-**Which issue has the most "yes" votes on average?** _____________________
+**Which issue has the most "yes" votes on average?** Palestinian Conflict
 
-**Which has the least?** ____________________
+**Which has the least?** Human Rights
 
 ---
 
@@ -377,6 +381,26 @@ issue_yes_percent
 - Consider using a line plot with `geom_line()`
 ```{r challenge-voting-agreement, message=FALSE}
 # Your code here (this is challenging - try your best!)
+agreement_data <- unvotes %>%
+  filter(country %in% c("United States", "China"),
+         issue == "Human rights") %>%
+  mutate(year = year(date)) %>%
+  select(rcid, country, vote, year) %>%
+  pivot_wider(names_from = country, values_from = vote) %>%
+  filter(!is.na(`United States`) & !is.na(China)) %>%
+  mutate(agree = (`United States` == China))
+agreement_yearly <- agreement_data %>%
+  group_by(year) %>%
+  summarize(percent_agreement = mean(agree) * 100)
+ggplot(agreement_yearly, aes(x = year, y = percent_agreement)) +
+  geom_line(color = "blue") +
+  labs(
+    title = "US-China Voting Agreement on Human Rights",
+    y = "Percent of Agreement",
+    x = "Year"
+  ) +
+  theme_minimal()
+
 ```
 
 ---
