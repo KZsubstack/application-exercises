@@ -1,6 +1,6 @@
 ---
 title: "AE 02 - Bechdel Test"
-author: "Your Name"
+author: "Kaden Zhu"
 date: "`r Sys.Date()`"
 output: 
   pdf_document:
@@ -115,9 +115,9 @@ bechdel90_13 %>%
   count(binary)
 ```
 
-**How many movies passed the test?** _____
+**How many movies passed the test?** 753
 
-**How many failed?** _____
+**How many failed?** 862
 
 ---
 
@@ -150,17 +150,19 @@ bechdel90_13 %>%
 
 **Your answer:**
 
-Movies that ___________ the test have higher median budgets.
+Movies that Fail the test have higher median budgets.
 
 **Task 2.2:** Which movies have higher median domestic gross: those that pass or fail?
 
 **Your answer:**
 
-Movies that ___________ the test have higher median domestic gross.
+Movies that Fail the test have higher median domestic gross.
 
 **Task 2.3:** What might explain these patterns?
 
-**Your answer:**
+**Your answer:** One possible explanation is that budget and domestic gross are positively correlated. Movies with larger budgets often spend more on production quality, marketing, and distribution, which can increase their domestic earnings. If movies that fail the Bechdel test tend to receive higher budgets, this may partly explain why they also show higher median domestic gross. 
+
+This isn't related to the answer, but one possible hypothesis is that movies that fail the Bechdel test may be more likely to be directed or produced by men. If male led projects historically receive larger budgets due to structural biases or existing power dynamics in the film industry, this could contribute to the observed budget gap.
 
 ___________________________________________________________________________
 ___________________________________________________________________________
@@ -182,7 +184,7 @@ Next, let's take a look at how median budget and gross vary by a more detailed i
 **Fill in the blank to group by `clean_test`:**
 ```{r detailed-summary, eval = FALSE}
 bechdel90_13 %>%
-  group_by(___) %>%
+  group_by(clean_test) %>%
   summarise(
     med_budget = median(budget_2013),
     med_domgross = median(domgross_2013, na.rm = TRUE),
@@ -192,11 +194,11 @@ bechdel90_13 %>%
 
 **Task 3.1:** Which category has the highest median budget?
 
-**Your answer:** _____
+**Your answer:** notalk
 
 **Task 3.2:** Which category has the highest median international gross?
 
-**Your answer:** _____
+**Your answer:** notalk
 
 ---
 
@@ -235,15 +237,15 @@ bechdel90_13 %>%
 
 **Task 4.1:** What is the movie with the highest ROI?
 
-**Your answer:** ___________________________________________________________
+**Your answer:** Paranormal Activity
 
 **Task 4.2:** What is its ROI value?
 
-**Your answer:** _____
+**Your answer:** 671.336857
 
 **Task 4.3:** Does this movie surprise you? Why or why not?
 
-**Your answer:**
+**Your answer:**It surprises me because I've never heard of Paranormal Activity in my life. After doing a Google search the movie got decent reviews and its budget was 15,000 that's very small compared to modern movies costing millions or billions. 
 
 ___________________________________________________________________________
 ___________________________________________________________________________
@@ -264,7 +266,7 @@ ggplot(data = bechdel90_13,
   labs(
     title = "Return on investment vs. Bechdel test result",
     x = "Detailed Bechdel result",
-    y = "___",
+    y = "Return on Investment",
     color = "Binary Bechdel result"
   )
 ```
@@ -273,7 +275,7 @@ ggplot(data = bechdel90_13,
 
 **Task 5.1:** Why is this plot difficult to interpret?
 
-**Your answer:**
+**Your answer:**There are movies that have super high roi compared to the rest in their Detailed bechdel category and also, this also compresses the other smaller more clustered data and then the difference between the majority of movies are going to be very difficult to see.
 
 ___________________________________________________________________________
 ___________________________________________________________________________
@@ -291,11 +293,11 @@ bechdel90_13 %>%
 
 **Task 5.2:** How many movies have ROI greater than 400?
 
-**Your answer:** _____
+**Your answer:** 3
 
 **Task 5.3:** What do you notice about the budgets of these high-ROI movies?
 
-**Your answer:**
+**Your answer:** These budgets vary a lot but they are all on the lower end. The higher ROI movies all have small budgets. They look like they are low budget films that earned very large domestic grosses relative to their production costs. ROI values that are high tend to come from inexpensive films that perform well at the box office compared to how much was spent.
 
 ___________________________________________________________________________
 
@@ -312,7 +314,7 @@ ggplot(data = bechdel90_13,
   geom_boxplot() +
   labs(
     title = "Return on investment vs. Bechdel test result",
-    subtitle = "___", # Something about zooming in to a certain level
+    subtitle = "Zoomed in the Y level to < 15 for better visibility on the more moderate trends", # Something about zooming in to a certain level
     x = "Detailed Bechdel result",
     y = "Return on investment",
     color = "Binary Bechdel result"
@@ -335,18 +337,17 @@ ggplot(data = bechdel90_13,
 
 **Task 7.1:** Looking at the zoomed plot, which category has the highest median ROI?
 
-**Your answer:** _____
+**Your answer:** the OK category where Bechdel test passess
 
 **Task 7.2:** Do movies that pass the Bechdel test (binary = PASS) appear to have higher or lower ROI than those that fail?
 
 **Your answer:**
 
-___________________________________________________________________________
-___________________________________________________________________________
+On average movies that pass the Bechdel test have a higher ROI than those who fail
 
 **Task 7.3:** What does this suggest about the financial argument for including women in films?
 
-**Your answer:**
+**Your answer:** This suggests that a moving assing the Bechdel test does not effect it's roi negatively and including women in films who talk about things that are not men doesn't hurt any roi and doing this could also be associated with higher roi. The data Does NOT support an argument that films with good female representation end up perform worse.
 
 ___________________________________________________________________________
 ___________________________________________________________________________
@@ -361,19 +362,19 @@ ___________________________________________________________________________
 **Hint:** Use `group_by()` and `summarise()` like we did earlier, but with `mean()` instead of `median()`.
 ```{r mean-roi, eval = FALSE}
 bechdel90_13 %>%
-  group_by(___) %>%
+  group_by(binary) %>%
   summarise(
-    mean_roi = mean(___, na.rm = TRUE)
+    mean_roi = mean(roi, na.rm = TRUE)
   )
 ```
 
-**Mean ROI for PASS:** _____
+**Mean ROI for PASS:** 7.994707
 
-**Mean ROI for FAIL:** _____
+**Mean ROI for FAIL:** 8.362388
 
 **Task 8.2:** How do these means compare to the medians we saw earlier? Why might they be different?
 
-**Your answer:**
+**Your answer:** The difference between what we saw earlier on the graph could be the fact that the mean is more sensitive to extreme values. we are looking at more fail categories and some fail movies have high roi outliers so the extreme values pull the mean upward, the median isn't effected as much by outliers and reflects the typical movie in each of the separate categories.
 
 ___________________________________________________________________________
 ___________________________________________________________________________
@@ -391,10 +392,25 @@ ___________________________________________________________________________
 - You might want to filter out extreme ROI values first
 - Consider using `geom_smooth()` to show trends
 ```{r roi-over-time, warning=FALSE}
-# Your code here
+bechdel90_13 %>%
+  filter(roi < 400) %>%
+  group_by(year, binary) %>%
+  summarise(
+    mean_roi = mean(roi, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  ggplot(aes(x = year, y = mean_roi, color = binary)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Mean ROI Over Time by Bechdel Test Result",
+    x = "Year",
+    y = "Mean ROI",
+    color = "Bechdel Result"
+  )
 ```
 
-**What trend do you notice?**
+**What trend do you notice?**There are a lot of variability in ROI that are influenced by very high performing films and there isn't a  pattern that show either pass or fail movies generate higher returns over time generally.
 
 ___________________________________________________________________________
 
