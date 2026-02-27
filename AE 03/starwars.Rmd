@@ -101,7 +101,7 @@ ___________________________________________________________________________
 The plot below maps several variables to aesthetics. However, there's an issue with how color is being used.
 
 **Original code:**
-```{r scatterplot-original, eval=FALSE}
+```{r scatterplot-original, eval=TRUE}
 ggplot(starwars, 
        aes(x = height, y = mass, color = gender, size = birth_year)) +
   geom_point(color = "pink")
@@ -188,7 +188,7 @@ starwars %>%
 ```
 
 **Now create your histogram:**
-```{r histogram, eval = FALSE}
+```{r histogram, eval=TRUE}
 # Fill in the blanks
 ggplot(starwars, aes(x = height)) +
   geom_histogram(binwidth = 5, fill = "steelblue", color = "white") +
@@ -235,7 +235,7 @@ Pick a numerical variable and a categorical variable and make a visualization to
 - height by gender
 - mass by species
 - birth_year by sex
-```{r num-cat, eval = FALSE}
+```{r num-cat, eval=TRUE}
 # Your code here
 ggplot(starwars, aes(x = height, y = species)) +
   geom_boxplot(fill = "lightblue") +
@@ -268,7 +268,7 @@ Pick a single categorical variable from the dataset and make a bar plot of its d
 - species
 - eye_color
 - hair_color
-```{r barplot,, eval = FALSE}
+```{r barplot,, eval=TRUE}
 # Your code here
 ggplot(starwars, aes(x = eye_color)) +
   geom_bar(fill = "coral") +
@@ -284,7 +284,7 @@ ggplot(starwars, aes(x = eye_color)) +
 **Your answer:** Brown Eye Color
 
 **Task 6.2:** If your plot has many categories with small bars that are hard to read, try flipping the coordinates:
-```{r barplot-flipped, eval = FALSE}
+```{r barplot-flipped, eval=TRUE}
 # Same code as above, but add coord_flip() at the end
 ggplot(starwars, aes(x = eye_color)) +
   geom_bar(fill = "coral") +
@@ -316,7 +316,7 @@ Pick two categorical variables and make a visualization to visualize the relatio
 - gender and hair_color
 
 **Option 1: Stacked bar plot**
-```{r cat-cat-stacked, eval = FALSE}
+```{r cat-cat-stacked, eval=TRUE}
 # Your code here
 ggplot(starwars, aes(x = gender, fill = species)) +
   geom_bar() +
@@ -329,7 +329,7 @@ ggplot(starwars, aes(x = gender, fill = species)) +
 ```
 
 **Option 2: Grouped bar plot (side-by-side)**
-```{r cat-cat-grouped, eval = FALSE}
+```{r cat-cat-grouped, eval=TRUE}
 # Your code here
 ggplot(starwars, aes(x = gender, fill = species)) +
   geom_bar(position = "dodge") +
@@ -368,7 +368,7 @@ Pick two numerical variables and two categorical variables and make a visualizat
 - species (categorical - use for facets, maybe filter to top 3-4 species)
 
 **Starter template:**
-```{r multi, eval=FALSE}
+```{r multi, eval=TRUE}
 # You might want to filter first to avoid too many facets
 starwars_filtered <- starwars %>%
   filter(species %in% c("Human", "Droid", "Wookiee", "Gungan"))  # Pick 3-4 species
