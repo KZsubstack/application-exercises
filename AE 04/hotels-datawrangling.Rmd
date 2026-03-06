@@ -3,14 +3,14 @@ title: "AE 04 - Hotel Bookings - Data Wrangling"
 author: "Kaden Zhu"
 date: "`r Sys.Date()`"
 output: 
-  html_document:
-    toc: true
-    toc_float: true
-    code_folding: show
   pdf_document:
     toc: true
     latex_engine: xelatex
     keep_tex: false
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
 ---
 ```{r setup, include=FALSE}
 userlib <- path.expand("~/R/4.5.1/library")
@@ -162,7 +162,7 @@ hotels %>%
 **What percentage of total bookings is this?**
 
 Calculate: (bookings with children/babies) / (total bookings) × 100
-```{r some-children, eval = TRUE}
+```{r some-children_percent, eval = TRUE}
 hotels %>%
   summarise(
     total = n(),
