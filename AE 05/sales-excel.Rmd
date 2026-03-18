@@ -1,6 +1,6 @@
 ---
 title: "AE 05 - Sales - Reading Excel Files"
-author: "Your Name"
+author: "Kaden Zhu"
 date: "`r Sys.Date()`"
 output: 
   pdf_document:
@@ -102,8 +102,8 @@ read_excel("data-raw/sales.xlsx")
 ```{r read-sales, eval = FALSE}
 # Fill in the blanks
 sales <- read_excel(
-  "___",           # File path
-  skip = ___       # Number of rows to skip (try 0, 1, 2, 3 and see what works)
+  "data-raw/sales.xlsx",           # File path
+  skip = 2 # Number of rows to skip (try 0, 1, 2, 3 and see what works)
 )
 
 sales
@@ -117,7 +117,7 @@ sales
 
 **How many rows and columns does the sales data have?**
 
-**Your answer:** _____ rows and _____ columns
+**Your answer:** 8 rows and 2 columns
 
 ---
 
@@ -133,16 +133,16 @@ sales
 **Task 2.1:** What does each row represent?
 
 **Your answer:**
+Each row represents a label or an individual item sold under that brand.
 
 ___________________________________________________________________________
 
 **Task 2.2:** What does each column represent?
-
-**Your answer:**
-
+Each Column represents a brand and the number sold of that item.
 ___________________________________________________________________________
-
+ 
 **Task 2.3:** Is this data in tidy format? Why or why not?
+
 
 **Reminder - Tidy data rules:**
 
@@ -151,7 +151,7 @@ ___________________________________________________________________________
 3. Each value is a cell
 
 **Your answer:**
-
+No, this data is not in tidy format. Brand names like Brand 1 and Brand 2 are mixed into the data rows instead of being stored in their own separate column, and one column contains two different types of values, both brand names and item IDs. In a tidy dataset, every column should represent one variable and every row should represent one observation of the same type, which is not the case here.
 ___________________________________________________________________________
 ___________________________________________________________________________
 
@@ -175,12 +175,16 @@ knitr::include_graphics("images/sales-2.png")
 **Task 3.1:** Use `pivot_longer()` to reshape the data.
 ```{r reshape-sales, eval = FALSE}
 # Fill in the blanks
-sales_tidy <- sales %>%
-  pivot_longer(
-    cols = ___,                    # Which columns to pivot (all except brand)
-    names_to = "___",              # Name for the new column with old column names
-    values_to = "___"              # Name for the new column with values
-  )
+sales_tidy <- sales %>% # had to figure out a different method because I didn't get how to answer this with only pivoting
+  rename(id = `Brand 1`) %>%
+  mutate(brand = if_else(str_detect(id, "Brand"), id, NA_character_)) %>%
+  fill(brand) %>%
+  mutate(brand = replace_na(brand, "Brand 1")) %>%  
+  filter(!str_detect(id, "Brand")) %>%
+  filter(n != "n") %>%
+  mutate(id = as.numeric(id),
+         n  = as.numeric(n)) %>%
+  select(brand, id, n)
 
 sales_tidy
 ```
@@ -202,13 +206,13 @@ sales_tidy
 nrow(sales_tidy)
 ```
 
-**Your answer:** _____ rows
+**Your answer:** 7 rows
 
 **Why does this number make sense?**
 
 **Your answer:**
 
-Original: _____ brands × _____ years = _____ rows in tidy format
+Original: 2 brands × 3-4 years = 7 rows in tidy format
 
 ---
 
@@ -219,7 +223,7 @@ Original: _____ brands × _____ years = _____ rows in tidy format
 **Why?** After pivoting, year is stored as character (text), but it should be numeric.
 ```{r convert-year, eval = FALSE}
 sales_tidy <- sales_tidy %>%
-  mutate(year = as.numeric(___))
+  mutate(year = as.numeric(year))
 
 # Check the type
 class(sales_tidy$year)
@@ -228,7 +232,7 @@ class(sales_tidy$year)
 **Task 4.2:** Remove any rows with missing sales values.
 ```{r remove-na, eval = FALSE}
 sales_tidy <- sales_tidy %>%
-  filter(!is.na(___))
+  filter(!is.na(sales))
 
 # Check how many rows remain
 nrow(sales_tidy)
@@ -237,7 +241,7 @@ nrow(sales_tidy)
 **Task 4.3:** Arrange the data by brand and year.
 ```{r arrange-sales, eval = FALSE}
 sales_tidy <- sales_tidy %>%
-  arrange(___, ___)
+  arrange(brand, year)
 
 sales_tidy
 ```

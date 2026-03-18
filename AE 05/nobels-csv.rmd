@@ -1,16 +1,16 @@
 ---
 title: "AE 05 - Nobel Winners - Data Import and Export"
-author: "Your Name"
+author: "Kaden Zhu"
 date: "`r Sys.Date()`"
 output: 
-  html_document:
-    toc: true
-    toc_float: true
-    code_folding: show
   pdf_document:
     toc: true
     latex_engine: xelatex
     keep_tex: false
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
@@ -77,8 +77,8 @@ ae-05-import-export/
 Let's first load the data from the `nobel.csv` file in the `data-raw` folder.
 
 **Fill in the blanks:**
-```{r read-nobel, eval = FALSE}
-nobel <- read_csv("___")
+```{r read-nobel, eval = TRUE}
+nobel <- read_csv("data-raw/nobel.csv")
 ```
 
 **Hint:** The file path is `"data-raw/nobel.csv"`
@@ -90,7 +90,7 @@ nobel <- read_csv("___")
 - Returns a tibble (tidyverse data frame)
 
 **Verify it worked:**
-```{r check-nobel, eval = FALSE}
+```{r check-nobel, eval = TRUE}
 # Look at the structure
 glimpse(nobel)
 
@@ -100,11 +100,37 @@ head(nobel)
 
 **Task 1.1:** How many Nobel laureates are in the dataset?
 
-**Your answer:** _____ laureates
+**Your answer:** 935 laureates
 
 **Task 1.2:** What variables are in the dataset?
 
-**Your answer:**
+**Your answer:** 
+id
+firstname
+surname
+year
+category
+affiliation
+city
+country
+born_date
+died_date
+gender
+born_city
+born_country
+born_country_code
+died_city
+died_country
+died_country_code
+overall_motivation
+share
+motivation
+born_country_original
+born_city_original
+died_country_original
+died_city_original
+city_original
+country_original
 
 ___________________________________________________________________________
 
@@ -118,7 +144,7 @@ Nobel prizes are awarded in different categories. Let's split the data into two 
 - **Non-STEM laureates:** Literature, Peace, Economics
 
 **First, explore the categories:**
-```{r explore-categories, eval = FALSE}
+```{r explore-categories, eval = TRUE}
 # See what categories exist
 nobel %>%
   count(category)
@@ -129,10 +155,10 @@ nobel %>%
 **Non-STEM categories:** Literature, Peace, Economic Sciences
 
 **Task 2.1:** Fill in the blanks to create a dataset of STEM laureates.
-```{r stem-laureates, eval = FALSE}
+```{r stem-laureates, eval = TRUE}
 # STEM laureates
 nobel_stem <- nobel %>%
-  filter(category %in% c("___", "___", "___"))
+  filter(category %in% c("Medicine", "Physics", "Chemistry"))
 ```
 
 **Hints:**
@@ -142,23 +168,23 @@ nobel_stem <- nobel %>%
 - Use `%in%` to check if category is in a vector of values
 
 **How many STEM laureates are there?**
-```{r count-stem, eval = FALSE}
+```{r count-stem, eval = TRUE}
 nrow(nobel_stem)
 ```
 
-**Your answer:** _____ STEM laureates
+**Your answer:** 607 STEM laureates
 
 **Task 2.2:** Fill in the blanks to create a dataset of non-STEM laureates.
 
 **Option 1: List the non-STEM categories explicitly**
-```{r non-stem-option1, eval = FALSE}
+```{r non-stem-option1, eval = TRUE}
 # Non-STEM laureates (explicit)
 nobel_non_stem <- nobel %>%
-  filter(category %in% c("___", "___", "___"))
+  filter(category %in% c("Literature", "Economics", "Peace"))
 ```
 
 **Option 2: Use NOT IN to exclude STEM categories**
-```{r non-stem-option2, eval = FALSE}
+```{r non-stem-option2, eval = TRUE}
 # Non-STEM laureates (using negation)
 nobel_non_stem <- nobel %>%
   filter(!(category %in% c("Physics", "Chemistry", "Physiology or Medicine")))
@@ -171,19 +197,19 @@ nobel_non_stem <- nobel %>%
 - Together: "NOT in the list"
 
 **How many non-STEM laureates are there?**
-```{r count-non-stem, eval = FALSE}
+```{r count-non-stem, eval = TRUE}
 nrow(nobel_non_stem)
 ```
 
-**Your answer:** _____ non-STEM laureates
+**Your answer:** 544 non-STEM laureates
 
 **Verification check:**
-```{r verify-split, eval = FALSE}
+```{r verify-split, eval = TRUE}
 # STEM + non-STEM should equal total
 nrow(nobel_stem) + nrow(nobel_non_stem) == nrow(nobel)
 ```
 
-**Does this equal TRUE?** _____
+**Does this equal TRUE?** FALSE
 
 ---
 
@@ -198,8 +224,8 @@ dir.create("data", showWarnings = FALSE)
 ```
 
 **Task 3.1:** Write the STEM laureates data to a CSV file.
-```{r write-stem, eval = FALSE}
-write_csv(___, "data/___.csv")
+```{r write-stem, eval = TRUE}
+write_csv(nobel_stem, "data/nobel-stem.csv")
 ```
 
 **Hints:**
@@ -207,8 +233,8 @@ write_csv(___, "data/___.csv")
 - Second argument: the file path (`"data/nobel-stem.csv"`)
 
 **Task 3.2:** Write the non-STEM laureates data to a CSV file.
-```{r write-non-stem, eval = FALSE}
-write_csv(___, "data/___.csv")
+```{r write-non-stem, eval = TRUE}
+write_csv(nobel_non_stem, "data/nobel-non-stem.csv")
 ```
 
 **Hint:** Use a different filename like `"data/nobel-non-stem.csv"`
@@ -229,7 +255,7 @@ list.files("data")
 ## Exercise 4: Read the Data Back In
 
 To verify everything worked, let's read one of the files we just created.
-```{r read-back, eval = FALSE}
+```{r read-back, eval = TRUE}
 # Read the STEM file back in
 stem_check <- read_csv("data/nobel-stem.csv")
 
@@ -237,45 +263,46 @@ stem_check <- read_csv("data/nobel-stem.csv")
 nrow(stem_check)
 ```
 
-**Does the number of rows match what you expected?** _____
+**Does the number of rows match what you expected?** yes 607 matches our previous nrow query on stem laureates
 
 ---
 
 ## Exercise 5: Explore the Subsets
 
 **Task 5.1:** Which STEM category has the most laureates?
-```{r stem-by-category, eval = FALSE}
+```{r stem-by-category, eval = TRUE}
 nobel_stem %>%
-  count(___, sort = TRUE)
+  count(category, sort = TRUE)
 ```
 
-**Your answer:** _____ has the most STEM laureates.
+**Your answer:** Medicine has the most STEM laureates.
 
 **Task 5.2:** Which decade had the most non-STEM laureates?
 
 **Hint:** You'll need to create a decade variable first.
-```{r non-stem-by-decade, eval = FALSE}
+```{r non-stem-by-decade, eval = TRUE}
 nobel_non_stem %>%
   mutate(decade = (year %/% 10) * 10) %>%  # Create decade variable
-  count(___, sort = TRUE)
+  count(decade, sort = TRUE)
 ```
 
-**Your answer:** The _____s had the most non-STEM laureates.
+**Your answer:** The 2000s had the most non-STEM laureates.
 
 ---
 
 ## Exercise 6: Challenge (Optional)
 
 **Task 6.1:** Create a summary that shows the number of laureates by category and gender.
-```{r category-gender-summary, eval = FALSE}
-nobel %>%
-  count(___, ___) %>%
-  pivot_wider(names_from = ___, values_from = ___)
+```{r category-gender-summary, eval = TRUE}
+category_gender_summary <- nobel %>%
+  count(category, gender) %>%
+  pivot_wider(names_from = gender, values_from = n)
+category_gender_summary
 ```
 
 **Task 6.2:** Write this summary to a CSV file called `nobel-summary.csv`.
 ```{r write-summary}
-# Your code here
+write_csv(category_gender_summary, "data/nobel-summary.csv")
 ```
 
 ---
@@ -284,10 +311,14 @@ nobel %>%
 
 **What did you learn about file organization and data workflows?**
 
+I learned that we can write filters of datasets into csvs that help optimize our workflow and branch out of the original dataset by having datasets tied to specific filters or categories.
+
 ___________________________________________________________________________
 ___________________________________________________________________________
 
 **Why is it useful to split data into subsets?**
+
+Splitting data into subsets allows us to write less queries and reuse datasets that we've generated before and manipulate these subsets further a lot easier.
 
 ___________________________________________________________________________
 
