@@ -180,14 +180,14 @@ nrow(nobel_stem)
 ```{r non-stem-option1, eval = TRUE}
 # Non-STEM laureates (explicit)
 nobel_non_stem <- nobel %>%
-  filter(category %in% c("Literature", "Economics", "Peace"))
+  filter(category %in% c("Literature", "Economic Sciences", "Peace"))
 ```
 
 **Option 2: Use NOT IN to exclude STEM categories**
 ```{r non-stem-option2, eval = TRUE}
 # Non-STEM laureates (using negation)
 nobel_non_stem <- nobel %>%
-  filter(!(category %in% c("Physics", "Chemistry", "Physiology or Medicine")))
+  filter(!(category %in% c("Physics", "Chemistry", "Medicine")))
 ```
 
 **Explanation of `!(x %in% y)`:**
@@ -209,7 +209,7 @@ nrow(nobel_non_stem)
 nrow(nobel_stem) + nrow(nobel_non_stem) == nrow(nobel)
 ```
 
-**Does this equal TRUE?** FALSE
+**Does this equal TRUE?** TRUE
 
 ---
 
