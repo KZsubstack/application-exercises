@@ -2,7 +2,7 @@
 title: "AE 05 - Sales - Reading Excel Files"
 author: "Kaden Zhu"
 date: "`r Sys.Date()`"
-output: 
+output:
   pdf_document:
     toc: true
     latex_engine: xelatex
@@ -79,7 +79,7 @@ First, let's look at what the raw Excel file looks like. Here's a screenshot of 
 knitr::include_graphics("images/sales-1.png")
 ```
 
-**The data shows sales by brand (rows) and year (columns).**
+**The data shows sales by brand (rows) with item IDs and quantities sold.**
 
 **Task 1.1:** Read in the Excel file from the `data-raw/` folder.
 
@@ -94,16 +94,16 @@ read_excel("data-raw/sales.xlsx")
 
 **Problems you might notice:**
 
-- Empty rows at the top
+- Empty rows at the top (descriptive text in rows 1-2, empty rows 3-4)
 - Column names might not be in the first row
-- Multiple sheets (maybe?)
+- Brand names are embedded as section headers within the data rows
 
 **Task 1.2:** Read the file correctly by skipping rows if needed.
-```{r read-sales, eval = FALSE}
-# Fill in the blanks
+```{r read-sales}
 sales <- read_excel(
-  "data-raw/sales.xlsx",           # File path
-  skip = 2 # Number of rows to skip (try 0, 1, 2, 3 and see what works)
+  "data-raw/sales.xlsx",
+  skip = 4,
+  col_names = c("id", "n")
 )
 
 sales
@@ -111,18 +111,17 @@ sales
 
 **Hints:**
 
-- `skip = 3`: Skips the first 3 rows
-- Try different skip values to see which gives clean column names
-- The first column should be brand names
+- `skip = 4`: Skips the first 4 rows (2 text rows + 2 empty rows)
+- `col_names = c("id", "n")`: Provides our own column names since the data doesn't have a clean header row
 
 **How many rows and columns does the sales data have?**
 
-**Your answer:** 8 rows and 2 columns
+**Your answer:** 9 rows and 2 columns
 
 ---
 
 ## Exercise 2: Understanding the Data Structure
-```{r examine-sales, eval = FALSE}
+```{r examine-sales}
 # Look at the structure
 glimpse(sales)
 
@@ -133,16 +132,16 @@ sales
 **Task 2.1:** What does each row represent?
 
 **Your answer:**
-Each row represents a label or an individual item sold under that brand.
 
-___________________________________________________________________________
+Each row represents either a brand header "Brand 1", "n" or a product with an item ID and the number ammount sold.
 
 **Task 2.2:** What does each column represent?
-Each Column represents a brand and the number sold of that item.
-___________________________________________________________________________
- 
-**Task 2.3:** Is this data in tidy format? Why or why not?
 
+**Your answer:**
+
+The `id` column has either a brand name for header rows or a product ID number. The `n` column contains the literal text "n" for header rows or the quantity sold.
+
+**Task 2.3:** Is this data in tidy format? Why or why not?
 
 **Reminder - Tidy data rules:**
 
@@ -151,11 +150,10 @@ ___________________________________________________________________________
 3. Each value is a cell
 
 **Your answer:**
-No, this data is not in tidy format. Brand names like Brand 1 and Brand 2 are mixed into the data rows instead of being stored in their own separate column, and one column contains two different types of values, both brand names and item IDs. In a tidy dataset, every column should represent one variable and every row should represent one observation of the same type, which is not the case here.
-___________________________________________________________________________
-___________________________________________________________________________
 
-**Hint:** In tidy format, "year" should be a single column, not multiple columns.
+No they are not in tidy format the brand names "Brand 1", "Brand 2" are mixed into the id column as if they were observations, when they are actually a grouping variable. In tidy format, brand should be its own column. the n column is also read as <chr> instead of <int> because of those brand name rows, meaning the numeric values are stored as strings and cannot be used for calculations without cleaning.
+
+**Hint:** In tidy format, "brand" should be its own column, not embedded as a row separator.
 
 ---
 
@@ -169,40 +167,34 @@ knitr::include_graphics("images/sales-2.png")
 **This means:**
 
 - One column for `brand`
-- One column for `year`  
-- One column for `sales` (the values)
+- One column for `id`
+- One column for `n` (the quantities)
 
-**Task 3.1:** Use `pivot_longer()` to reshape the data.
-```{r reshape-sales, eval = FALSE}
-# Fill in the blanks
-sales_tidy <- sales %>% # had to figure out a different method because I didn't get how to answer this with only pivoting
-  rename(id = `Brand 1`) %>%
-  mutate(brand = if_else(str_detect(id, "Brand"), id, NA_character_)) %>%
-  fill(brand) %>%
-  mutate(brand = replace_na(brand, "Brand 1")) %>%  
-  filter(!str_detect(id, "Brand")) %>%
+**Task 3.1:** Add a brand column by filling down from the brand-header rows, then remove those header rows.
+```{r reshape-sales}
+sales_tidy <- sales %>%
+  mutate(brand = if_else(n == "n", id, NA_character_)) %>%
+  fill(brand, .direction = "down") %>%
   filter(n != "n") %>%
-  mutate(id = as.numeric(id),
-         n  = as.numeric(n)) %>%
+  mutate(
+    id = as.numeric(id),
+    n = as.numeric(n)
+  ) %>%
   select(brand, id, n)
 
 sales_tidy
 ```
 
-**Hints:**
+**What this code does:**
 
-- `cols = -brand`: All columns except brand
-- `names_to = "year"`: Creates a column called "year"
-- `values_to = "sales"`: Creates a column called "sales"
-
-**What `pivot_longer()` does:**
-
-- Takes wide data and makes it long
-- Column names become values in a new column
-- Values from those columns go into another new column
+- Identifies brand-header rows (where `n == "n"`)
+- Extracts the brand name from those rows into a new column
+- Uses `fill()` to propagate the brand name down to each product row
+- Filters out the header rows, keeping only actual data
+- Converts `id` and `n` from character to numeric
 
 **How many rows does the tidy data have?**
-```{r count-tidy-rows, eval = FALSE}
+```{r count-tidy-rows}
 nrow(sales_tidy)
 ```
 
@@ -212,36 +204,29 @@ nrow(sales_tidy)
 
 **Your answer:**
 
-Original: 2 brands × 3-4 years = 7 rows in tidy format
+the original table 2 brands × 3 + 4 products = 7 rows in tidy format Brand 1 has 3 items, Brand 2 has 4 items
 
 ---
 
 ## Exercise 4: Additional Data Cleaning (Stretch Goal)
 
-**Task 4.1:** Convert the `year` column to numeric.
-
-**Why?** After pivoting, year is stored as character (text), but it should be numeric.
-```{r convert-year, eval = FALSE}
-sales_tidy <- sales_tidy %>%
-  mutate(year = as.numeric(year))
-
-# Check the type
-class(sales_tidy$year)
+**Task 4.1:** Verify the column types are correct.
+```{r check-types}
+glimpse(sales_tidy)
 ```
 
-**Task 4.2:** Remove any rows with missing sales values.
-```{r remove-na, eval = FALSE}
+**Task 4.2:** Remove any rows with missing values.
+```{r remove-na}
 sales_tidy <- sales_tidy %>%
-  filter(!is.na(sales))
+  filter(!is.na(n))
 
-# Check how many rows remain
 nrow(sales_tidy)
 ```
 
-**Task 4.3:** Arrange the data by brand and year.
-```{r arrange-sales, eval = FALSE}
+**Task 4.3:** Arrange the data by brand and id.
+```{r arrange-sales}
 sales_tidy <- sales_tidy %>%
-  arrange(brand, year)
+  arrange(brand, id)
 
 sales_tidy
 ```
@@ -251,63 +236,54 @@ sales_tidy
 ## Exercise 5: Visualize the Data
 
 Now that the data is tidy, we can easily create visualizations!
-```{r visualize-sales, eval=FALSE}
-ggplot(sales_tidy, aes(x = year, y = sales, color = brand)) +
-  geom_line(size = 1) +
-  geom_point(size = 2) +
+```{r visualize-sales}
+ggplot(sales_tidy, aes(x = factor(id), y = n, fill = brand)) +
+  geom_col(position = "dodge") +
   labs(
-    title = "Sales by Brand Over Time",
-    x = "Year",
-    y = "Sales",
-    color = "Brand"
+    title = "Number Sold by Item ID and Brand",
+    x = "Item ID",
+    y = "Number Sold",
+    fill = "Brand"
   ) +
   theme_minimal()
 ```
 
-**Task 5.1:** Which brand has the highest sales in the most recent year?
+**Task 5.1:** Which item has the highest quantity sold?
 
-**Your answer:** _____
+**Your answer:** Item 1234 from Brand 1 has the highest quantity sold, 8 units.
 
-**Task 5.2:** Which brand shows the most growth over time?
+**Task 5.2:** Which brand has more total sales?
 
 **Your answer:**
 
-___________________________________________________________________________
+Brand 2 has more total sales 1 + 3 + 6 + 5 = 15 compared to Brand 1 8 + 2 + 3 = 13.
 
 ---
 
 ## Exercise 6: Write Out the Tidy Data
 
 Save the tidy data to a CSV file for future use.
-```{r write-tidy-sales, eval = FALSE}
-# Create data folder if needed
+```{r write-tidy-sales}
 dir.create("data", showWarnings = FALSE)
 
-# Write the tidy data
-write_csv(___, "data/___.csv")
+write_csv(sales_tidy, "data/sales-tidy.csv")
 ```
-
-**Hint:** Use filename like `"data/sales-tidy.csv"`
 
 ---
 
 ## Exercise 7: Challenge (Optional)
 
 **Task 7.1:** Read the sales data from a different sheet (if the Excel file has multiple sheets).
-```{r read-sheet2, eval = FALSE}
-# First check what sheets exist
+```{r read-sheet2}
 excel_sheets("data-raw/sales.xlsx")
-
-# Read from a specific sheet
-# sales_sheet2 <- read_excel("data-raw/sales.xlsx", sheet = ___)
 ```
 
-**Task 7.2:** Calculate the total sales for each brand across all years.
-```{r total-sales, eval = FALSE}
+**Task 7.2:** Calculate the total sales for each brand across all items.
+```{r total-sales}
 sales_tidy %>%
-  group_by(___) %>%
-  summarise(total_sales = sum(___)) %>%
-  arrange(desc(___))
+  group_by(brand) %>%
+  summarise(total_sales = sum(n)) %>%
+  arrange(desc(total_sales))
 ```
 
 ---
@@ -316,17 +292,15 @@ sales_tidy %>%
 
 **What was the most challenging part of reading and cleaning the Excel data?**
 
-___________________________________________________________________________
-___________________________________________________________________________
+The most challenging part was handling the brand names embedded as section-header rows within the data. Unlike a standard CSV, the Excel file had descriptive text at the top and brand labels mixed in with the actual data rows, so we had to carefully use `skip`, and also make custom column names, to create a proper tidy dataset.
 
 **Why is tidy data important for analysis and visualization?**
 
-___________________________________________________________________________
-___________________________________________________________________________
+Tidy data makes it straightforward to use tools like ggplot2 and dplyr because each variable is in its own column and each observation is its own row. This structure means the same filter, mutate, group_by, summarise work regularly, and it makes mapping aesthetics in plots more straightfoward
 
 **What's one thing you learned about `pivot_longer()`?**
 
-___________________________________________________________________________
+The dataset didn't require `pivot_longer()` because it had embedded row headers, not wide format year columns, we needed to restructure data so that information stored in the structure of the table have brand names as row separators to become explicit values in a column.
 
 ---
 
@@ -334,10 +308,10 @@ ___________________________________________________________________________
 
 **Before you finish:**
 
-1. ✅ Make sure all code chunks run without errors
-2. ✅ Fill in all blanks
-3. ✅ Knit to HTML first
-4. ✅ If you completed stretch goals, verify the plots display correctly
+1. Make sure all code chunks run without errors
+2. Fill in all blanks
+3. Knit to HTML first
+4. If you completed stretch goals, verify the plots display correctly
 
 **Git workflow:**
 
@@ -357,13 +331,13 @@ For the full AE 05 assignment, you should submit BOTH files:
 1. **Generate PDF for ae-05-nobel.Rmd:**
 
    - Open `ae-05-nobel.Rmd`
-   - Click **Knit** dropdown → **Knit to PDF**
+   - Click **Knit** dropdown -> **Knit to PDF**
    - Save as `ae-05-nobel.pdf`
 
 2. **Generate PDF for ae-05-sales.Rmd:**
 
    - Open `ae-05-sales.Rmd`
-   - Click **Knit** dropdown → **Knit to PDF**
+   - Click **Knit** dropdown -> **Knit to PDF**
    - Save as `ae-05-sales.pdf`
 
 3. **Submit BOTH PDFs to Canvas**
@@ -417,7 +391,7 @@ For the full AE 05 assignment, you should submit BOTH files:
 data <- read_excel("path/file.xlsx")
 
 # With options
-data <- read_excel("path/file.xlsx", 
+data <- read_excel("path/file.xlsx",
                    sheet = "Sheet1",    # Specific sheet
                    skip = 3,            # Skip rows
                    col_names = TRUE)    # First row is headers
