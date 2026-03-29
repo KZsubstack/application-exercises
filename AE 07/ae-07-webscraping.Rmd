@@ -1,0 +1,705 @@
+---
+title: "AE 07 - Web Scraping IMDB"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+  pdf_document:
+    toc: true
+    latex_engine: xelatex
+    keep_tex: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, eval = FALSE)
+```
+
+## Introduction
+
+In this application exercise, you'll learn the basics of **web scraping** - the process of extracting data from websites. You'll scrape movie and TV show data from IMDB (Internet Movie Database) to create datasets you can analyze.
+
+**Important:** Web scraping should always be done responsibly and ethically. We're using IMDB's public charts, which are designed to be viewed. Always check a website's Terms of Service and `robots.txt` file before scraping.
+
+**In this application exercise, you will:**
+
+-   Read HTML pages into R
+-   Extract specific elements using CSS selectors
+-   Clean scraped text data with string manipulation
+-   Build datasets from web-scraped data
+-   Manually add data by indexing into data frames
+-   Practice reproducible web scraping workflows
+
+**Estimated time:** 60-75 minutes
+
+**Note:** This AE uses R scripts (`.R` files) instead of R Markdown for parts of the exercise. You'll work with four scripts:
+
+1.  `01-imdb-250movies.R` - Scrape top 250 movies (with blanks to fill)
+2.  `02-imdb-tvshows.R` - Scrape popular TV shows (with blanks to fill)
+3.  `03-imdb-250movies-complete.R` - Complete solution for movies
+4.  `04-imdb-tvshows-complete.R` - Complete solution for TV shows
+
+------------------------------------------------------------------------
+
+## Getting Started
+
+### Fork and Clone Workflow
+
+**Quick reminder:** Work in YOUR forked `application-exercises` repository.
+
+1.  Navigate to the `ae-07-webscraping` folder in YOUR fork
+2.  You'll see this `.Rmd` file and four `.R` script files
+3.  Open `ae-07-webscraping.Rmd` (this file)
+4.  Update the YAML with your name
+5.  Click **Knit** to verify it works
+
+**Working with R scripts:**
+
+R scripts (`.R` files) are different from R Markdown (`.Rmd` files):
+
+-   No narrative text, just code and comments
+-   No knitting - you run code line by line or in chunks
+-   Great for data cleaning, scraping, and automation tasks
+-   Comments start with `#`
+
+------------------------------------------------------------------------
+
+## Web Scraping Overview
+
+### What is Web Scraping?
+
+**Web scraping** is the process of extracting data from websites. Instead of manually copying data, we write code to:
+
+1.  Read the HTML of a webpage
+2.  Find the specific elements we want (titles, ratings, etc.)
+3.  Extract the text or data from those elements
+4.  Clean and organize the data into a usable format
+
+### The `rvest` Package
+
+We'll use the **rvest** package (pronounced "harvest") for web scraping. Key functions:
+
+-   `read_html()`: Reads a webpage's HTML
+-   `html_nodes()`: Selects specific HTML elements using CSS selectors
+-   `html_text()`: Extracts text from HTML elements
+-   `html_attr()`: Extracts attributes (like links) from HTML elements
+
+### How to Find CSS Selectors
+
+CSS selectors identify specific elements on a webpage. To find them:
+
+1.  Open the webpage in Chrome or Firefox
+2.  Right-click on the element you want → "Inspect" or "Inspect Element"
+3.  In the developer tools, right-click the highlighted HTML → Copy → Copy selector
+4.  Or use a browser extension like SelectorGadget
+
+**Common CSS selector patterns:**
+
+-   `.className` - selects elements with a specific class
+-   `#idName` - selects element with a specific ID
+-   `tagName` - selects all elements of that type (e.g., `a` for links)
+-   Combinations like `.titleColumn a` - selects `<a>` tags inside class `titleColumn`
+
+------------------------------------------------------------------------
+
+## Part 1: Scraping Top 250 Movies
+
+### Overview
+
+We'll scrape IMDB's Top 250 Movies chart: <https://www.imdb.com/chart/top>
+
+This page lists the highest-rated movies on IMDB. For each movie, we'll extract:
+
+-   **Title** (e.g., "The Shawshank Redemption")
+-   **Year** (e.g., 1994)
+-   **Rating** (e.g., 9.3)
+
+### Exercise 1: Inspect the Webpage
+
+Before we code, let's understand the webpage structure.
+
+**Task 1.1:** Open <https://www.imdb.com/chart/top> in your browser.
+
+**Task 1.2:** Right-click on the first movie title ("The Shawshank Redemption" or whatever is #1 now) and select "Inspect" or "Inspect Element."
+
+**Task 1.3:** Look at the HTML structure. You'll see something like:
+
+```{html}
+<td class="titleColumn">
+  <a href="/title/tt0111161/">The Shawshank Redemption</a>
+  <span class="secondaryInfo">(1994)</span>
+</td>
+```
+
+**What patterns do you notice?**
+
+**Your answer:**
+
+-   Movie titles are in: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+-   Years are in: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+-   Ratings are in: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+------------------------------------------------------------------------
+
+### Exercise 2: Open and Complete the Movies Script
+
+**Task 2.1:** In RStudio's Files pane, open `01-imdb-250movies.R`
+
+You'll see a script with blanks to fill in. The structure is:
+
+1.  Load packages
+2.  Read the HTML page
+3.  Extract titles
+4.  Extract years (with string cleaning)
+5.  Extract ratings
+6.  Combine into a data frame
+7.  Add rank numbers
+
+**Task 2.2:** Work through the script and fill in ALL the blanks. Hints are provided in comments.
+
+**Key blanks to fill:**
+
+-   `read_html("___")` - the IMDB URL
+-   `html_nodes("___")` - CSS selectors for titles, years, and ratings
+-   String manipulation to clean years (remove parentheses)
+-   Tibble column assignments
+
+**Task 2.3:** Run your code line by line (Ctrl+Enter or Cmd+Enter) or select all and run.
+
+**Task 2.4:** Check your results. You should get a data frame with 250 movies. Run:
+
+```{r check-movies, eval=FALSE}
+# After running your script, these should work:
+head(imdb_top_250)
+nrow(imdb_top_250)  # Should be 250
+```
+
+**How many movies did you successfully scrape?** \_\_\_\_\_\_
+
+**What is the #1 ranked movie?** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+------------------------------------------------------------------------
+
+### Exercise 3: Understanding the Code
+
+Let's break down what the movies script does:
+
+**Task 3.1:** Explain what this code does in plain English:
+
+```{r explain-read}
+page <- read_html("https://www.imdb.com/chart/top")
+```
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+**Task 3.2:** Explain what the pipe `%>%` does in this code:
+
+```{r explain-pipe}
+titles <- page %>%
+  html_nodes(".titleColumn a") %>%
+  html_text()
+```
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+**Task 3.3:** The year extraction uses `str_remove()` twice. Why?
+
+```{r explain-str-remove}
+years <- page %>%
+  html_nodes(".secondaryInfo") %>%
+  html_text() %>%
+  str_remove("\\(") %>%
+  str_remove("\\)") %>%
+  as.numeric()
+```
+
+**Hint:** Look at the raw HTML - years appear as `(1994)`
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+### Exercise 4: Verify Your Data
+
+**Task 4.1:** Check if your scraping worked correctly. Fill in the code:
+
+```{r verify-movies}
+# Check structure
+str(imdb_top_250)
+
+# Look at the top 10
+imdb_top_250 %>%
+  slice(1:10)
+
+# Check for missing values
+imdb_top_250 %>%
+  summarise(
+    missing_titles = sum(is.na(___)),
+    missing_ratings = sum(is.na(___)),
+    missing_years = sum(is.na(___))
+  )
+```
+
+**How many missing values do you have?** \_\_\_\_\_\_\_
+
+**If you have missing values, what might have gone wrong?**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Part 2: Scraping Popular TV Shows
+
+### Overview
+
+Now we'll scrape IMDB's Most Popular TV Shows: <https://www.imdb.com/chart/tvmeter>
+
+This is similar to movies, but with some key differences:
+
+-   Different CSS selectors
+-   Different HTML structure
+-   We'll add additional information manually for the first 3 shows
+
+------------------------------------------------------------------------
+
+### Exercise 5: Inspect the TV Shows Page
+
+**Task 5.1:** Open <https://www.imdb.com/chart/tvmeter> in your browser.
+
+**Task 5.2:** Inspect the first TV show. How is the HTML structure different from the movies page?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+**Task 5.3:** Note the CSS selectors you'll need for:
+
+-   TV show names: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+-   Years: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+-   Ratings: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+------------------------------------------------------------------------
+
+### Exercise 6: Complete the TV Shows Script
+
+**Task 6.1:** Open `02-imdb-tvshows.R` in RStudio.
+
+**Task 6.2:** Fill in ALL the blanks in the script. This is more challenging than the movies script!
+
+**Key differences to note:**
+
+-   The URL is different
+-   The CSS selectors are different
+-   You need to extract and clean the show names (they include extra info)
+-   You'll manually add genre, runtime, and episode count for the first 3 shows
+
+**Task 6.3:** For the first 3 TV shows, visit their individual IMDB pages and record:
+
+**Show #1:**
+
+-   Name: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Genre: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Runtime (minutes): \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Number of episodes: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+**Show #2:**
+
+-   Name: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Genre: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Runtime (minutes): \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Number of episodes: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+**Show #3:**
+
+-   Name: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Genre: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Runtime (minutes): \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Number of episodes: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+**Task 6.4:** Add this information to your script using indexing:
+
+```{r manual-data-entry, eval=FALSE}
+# Example for show #1
+tvshows$genre[1] <- "Drama, Horror, Mystery"  # Replace with actual genre
+tvshows$runtime[1] <- 494                     # Replace with actual runtime
+tvshows$n_episode[1] <- 9                     # Replace with actual episodes
+```
+
+------------------------------------------------------------------------
+
+### Exercise 7: Understanding Manual Data Entry
+
+**Task 7.1:** Why do we use `tvshows$genre[1]` instead of creating a new data frame?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+**Task 7.2:** What does the `[1]` mean in `tvshows$genre[1]`?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+**Task 7.3:** How would you add information for the 10th show?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Part 3: Comparing Approaches
+
+### Exercise 8: Movies vs TV Shows - What's Different?
+
+**Task 8.1:** Compare the two scripts. What was easier/harder in the TV shows script?
+
+**Easier in TV shows:**
+
+------------------------------------------------------------------------
+
+**Harder in TV shows:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+**Task 8.2:** Why did we need to use `str_remove_all()` and `str_squish()` for TV show names but not movie titles?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+**Task 8.3:** Looking at the complete scripts (`03-imdb-250movies-complete.R` and `04-imdb-tvshows-complete.R`), check your work. Did you get the CSS selectors correct?
+
+**What I got right:**
+
+------------------------------------------------------------------------
+
+**What I need to fix:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Part 4: Exploring the Data
+
+Now that you've scraped both datasets, let's analyze them!
+
+### Exercise 9: Movie Analysis
+
+**Task 9.1:** What decade has the most movies in the top 250?
+
+```{r decade-analysis}
+imdb_top_250 %>%
+  mutate(decade = floor(year / 10) * 10) %>%
+  count(decade, sort = TRUE)
+```
+
+**Answer:** The \_\_\_\_\_\_s have the most movies in the top 250.
+
+**Task 9.2:** What's the average rating of movies in the top 250?
+
+```{r avg-rating}
+imdb_top_250 %>%
+  summarise(avg_rating = mean(___))
+```
+
+**Answer:** The average rating is \_\_\_\_\_\_
+
+**Task 9.3:** Create a visualization showing ratings over time:
+
+```{r rating-over-time}
+ggplot(imdb_top_250, aes(x = ___, y = ___)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth() +
+  labs(
+    title = "___",
+    x = "___",
+    y = "___"
+  )
+```
+
+**What pattern do you see?**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+### Exercise 10: TV Show Analysis
+
+**Task 10.1:** How many TV shows did you successfully scrape?
+
+```{r count-shows}
+nrow(tvshows)
+```
+
+**Answer:** \_\_\_\_\_\_ shows
+
+**Task 10.2:** What's the range of years for the TV shows?
+
+```{r year-range}
+tvshows %>%
+  summarise(
+    earliest = min(___, na.rm = TRUE),
+    latest = max(___, na.rm = TRUE)
+  )
+```
+
+**Answer:** From \_\_\_\_\_ to \_\_\_\_\_
+
+**Task 10.3:** Based on the 3 shows where you added genre information, what genres seem popular?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Part 5: Reflection on Web Scraping
+
+### Exercise 11: Challenges and Ethics
+
+**Task 11.1:** What was the most challenging part of this exercise?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+**Task 11.2:** Why is it important to check a website's `robots.txt` file before scraping?
+
+**Hint:** Try visiting <https://www.imdb.com/robots.txt>
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+**Task 11.3:** What are some situations where web scraping might NOT be appropriate or legal?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+**Task 11.4:** If IMDB changed their website design tomorrow, what would happen to your scraping code?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+**Task 11.5:** Why might an API (Application Programming Interface) be preferable to web scraping?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Part 6: Challenge (Optional)
+
+### Exercise 12: Scrape Additional Information
+
+**Challenge:** Pick one movie from the top 250 and scrape additional information from its individual page.
+
+**Task 12.1:** Choose a movie and visit its IMDB page. What additional information is available?
+
+**Movie chosen:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+**Additional info available:** (Director, Cast, Runtime, Budget, etc.)
+
+------------------------------------------------------------------------
+
+**Task 12.2:** Write code to scrape at least one additional piece of information:
+
+```{r challenge-scrape}
+# Your code here
+```
+
+**Task 12.3:** What CSS selector(s) did you use?
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Knit and Submit
+
+**Before you finish:**
+
+1.  ✅ Make sure both R scripts run without errors
+2.  ✅ Fill in all answer spaces in this .Rmd file
+3.  ✅ Knit to HTML first to verify everything works
+4.  ✅ Review the HTML output
+
+**Git workflow:**
+
+1.  Click the **Git** pane
+2.  Check boxes next to ALL changed files (this .Rmd AND the .R scripts)
+3.  Click **Commit**
+4.  Write a commit message: "Completed AE 07 - Web Scraping"
+5.  Click **Commit**
+6.  Click **Push**
+7.  Verify your work is on GitHub in **YOUR fork**
+
+------------------------------------------------------------------------
+
+## Generate PDF for Canvas Submission
+
+Once everything works in HTML:
+
+1.  Click the **Knit** dropdown arrow
+2.  Select **Knit to PDF**
+3.  Wait for PDF generation
+4.  Find `ae-07-webscraping.pdf` in the Files pane
+5.  Export and save to your computer
+6.  Submit the PDF to Canvas
+
+**Remember:** Submit to BOTH GitHub (your .Rmd AND .R files) AND Canvas (the PDF)!
+
+------------------------------------------------------------------------
+
+## Key Concepts Summary
+
+**Web Scraping Workflow:**
+
+1.  **Inspect** the webpage to understand HTML structure
+2.  **Identify** CSS selectors for the elements you want
+3.  **Read** the HTML with `read_html()`
+4.  **Extract** elements with `html_nodes()` and CSS selectors
+5.  **Get text** with `html_text()`
+6.  **Clean** the text with stringr functions
+7.  **Combine** into a data frame
+8.  **Verify** your results
+
+**Key Functions:**
+
+-   `read_html(url)` - Read a webpage
+-   `html_nodes(css)` - Select elements by CSS selector
+-   `html_text()` - Extract text from elements
+-   `str_remove()`, `str_remove_all()` - Remove patterns from strings
+-   `str_squish()` - Remove extra whitespace
+-   `as.numeric()` - Convert text to numbers
+
+**CSS Selectors:**
+
+-   `.className` - Elements with a class
+-   `#idName` - Element with an ID
+-   `tag.className` - Specific tag with a class
+-   `.class1 .class2` - Nested classes
+
+------------------------------------------------------------------------
+
+## Resources
+
+**Learn more about web scraping:**
+
+-   [rvest documentation](https://rvest.tidyverse.org/)
+-   [SelectorGadget](https://selectorgadget.com/) - Browser extension for finding CSS selectors
+-   [W3Schools CSS Selectors](https://www.w3schools.com/cssref/css_selectors.asp)
+
+**Ethics and legality:**
+
+-   Always check `robots.txt` (add `/robots.txt` to any domain)
+-   Respect rate limits (don't overload servers)
+-   Check Terms of Service
+-   Prefer APIs when available
+-   Give attribution to data sources
+
+------------------------------------------------------------------------
+
+## Troubleshooting
+
+**Common issues:**
+
+-   **Error: "could not find function":** Load the packages (tidyverse, rvest)
+-   **Empty or NULL results:** CSS selector might be wrong - double-check by inspecting the page
+-   **Wrong number of elements:** The selector might be matching too many or too few elements
+-   **Strange text with `\n` or extra spaces:** Use `str_remove_all()` and `str_squish()` to clean
+-   **Can't convert to numeric:** Make sure you removed ALL non-numeric characters first
+
+**CSS selector issues:**
+
+-   Use browser dev tools to test selectors
+-   Start broad, then get more specific
+-   Classes start with `.` and IDs start with `#`
+-   Spaces in selectors mean "descendant" (nested elements)
+
+**Website changes:**
+
+-   Websites update their HTML frequently
+-   If your code worked before but doesn't now, the selectors probably changed
+-   Re-inspect the page and update your selectors
+
+**If you're stuck:**
+
+-   Check the complete solution scripts (`03-` and `04-`)
+-   Use SelectorGadget to find CSS selectors
+-   Ask on the discussion board
+-   Attend office hours
+-   Review the rvest documentation
+
+------------------------------------------------------------------------
+
+## Data Dictionary
+
+### imdb_top_250
+
+| Variable | Type    | Description                              |
+|:---------|:--------|:-----------------------------------------|
+| rank     | integer | Ranking on IMDB Top 250 list (1-250)    |
+| title    | character | Movie title                             |
+| rating   | numeric | IMDB rating (0-10)                       |
+| year     | integer | Year of release                          |
+
+### tvshows
+
+| Variable  | Type    | Description                                    |
+|:----------|:--------|:-----------------------------------------------|
+| rank      | integer | Ranking on IMDB popularity chart (1-100)      |
+| name      | character | TV show title                                |
+| year      | integer | Year show premiered                            |
+| score     | numeric | IMDB rating (0-10)                             |
+| genre     | character | Genre(s) - manually added for first 3 shows  |
+| runtime   | integer | Episode runtime in minutes                     |
+| n_episode | integer | Number of episodes                             |
