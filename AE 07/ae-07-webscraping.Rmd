@@ -1,16 +1,16 @@
 ---
 title: "AE 07 - Web Scraping IMDB"
-author: "Your Name"
+author: "Kaden Zhu"
 date: "`r Sys.Date()`"
 output: 
-  html_document:
-    toc: true
-    toc_float: true
-    code_folding: show
   pdf_document:
     toc: true
     latex_engine: xelatex
     keep_tex: false
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
 ---
 
 ```{r setup, include=FALSE}
@@ -137,11 +137,11 @@ Before we code, let's understand the webpage structure.
 
 **Your answer:**
 
--   Movie titles are in: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Movie titles are in: <h3 class="ipc-title__text">
 
--   Years are in: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Years are in: <span class="sc-3ac6b047-6 dTZPpv cli-title-metadata-item">
 
--   Ratings are in: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Ratings are in: <span class="ipc-rating-star--rating">
 
 ------------------------------------------------------------------------
 
@@ -174,13 +174,13 @@ You'll see a script with blanks to fill in. The structure is:
 
 ```{r check-movies, eval=FALSE}
 # After running your script, these should work:
-head(imdb_top_250)
-nrow(imdb_top_250)  # Should be 250
+head(imdb_top_25)
+nrow(imdb_top_25)  # Should be 250
 ```
 
-**How many movies did you successfully scrape?** \_\_\_\_\_\_
+**How many movies did you successfully scrape?** 25
 
-**What is the #1 ranked movie?** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+**What is the #1 ranked movie?** Shawshank Redemption
 
 ------------------------------------------------------------------------
 
@@ -194,7 +194,7 @@ Let's break down what the movies script does:
 page <- read_html("https://www.imdb.com/chart/top")
 ```
 
-**Your answer:**
+**Your answer:** It downloads the HTML code of the webpage and then stores it as an object called page, so you can reuse page and also search through it and extract specific elements with specific html_nodes().
 
 ------------------------------------------------------------------------
 
@@ -206,7 +206,7 @@ titles <- page %>%
   html_text()
 ```
 
-**Your answer:**
+**Your answer:** The pipe sets titles as the output of taking the page and passing it into html_nodes to select html elements matching ".titleColumn a" then passes it to html_text() to extract the html_text.
 
 ------------------------------------------------------------------------
 
@@ -224,7 +224,7 @@ years <- page %>%
 **Hint:** Look at the raw HTML - years appear as `(1994)`
 
 **Your answer:**
-
+The year extraction needs to remove the left facing parenthesis and the right facing parenthesis one time for each so you're left with just 1994 which you can convert to numeric 
 ------------------------------------------------------------------------
 
 ------------------------------------------------------------------------
@@ -235,25 +235,25 @@ years <- page %>%
 
 ```{r verify-movies}
 # Check structure
-str(imdb_top_250)
+str(imdb_top_25)
 
 # Look at the top 10
-imdb_top_250 %>%
+imdb_top_25 %>%
   slice(1:10)
 
 # Check for missing values
-imdb_top_250 %>%
+imdb_top_25 %>%
   summarise(
-    missing_titles = sum(is.na(___)),
-    missing_ratings = sum(is.na(___)),
-    missing_years = sum(is.na(___))
+    missing_titles = sum(is.na(title)),
+    missing_ratings = sum(is.na(rating)),
+    missing_years = sum(is.na(year))
   )
 ```
 
-**How many missing values do you have?** \_\_\_\_\_\_\_
+**How many missing values do you have?** 0 for ratings, titles, and years
 
 **If you have missing values, what might have gone wrong?**
-
+Did not have missing values
 ------------------------------------------------------------------------
 
 ------------------------------------------------------------------------
@@ -281,6 +281,14 @@ This is similar to movies, but with some key differences:
 **Task 5.2:** Inspect the first TV show. How is the HTML structure different from the movies page?
 
 **Your answer:**
+They aren't really different structurally, below is the TV html structure for the title and below that is the movie's name's html structure the nodes are also the same .cli-title-metadata-item
+
+the nodes we care about for both are .ipc-title-link-wrapper .ipc-title__text"  and for ratings they are both 
+.ipc-rating-star--rating and for years they are also both .cli-title-metadata-item
+
+<h3 class="ipc-title__text"> </h3>
+
+<h3 class="ipc-title__text">  </h3>
 
 ------------------------------------------------------------------------
 
@@ -288,11 +296,11 @@ This is similar to movies, but with some key differences:
 
 **Task 5.3:** Note the CSS selectors you'll need for:
 
--   TV show names: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   TV show names: .ipc-title-link-wrapper .ipc-title__text
 
--   Years: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Years: .cli-title-metadata-item
 
--   Ratings: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Ratings: .ipc-rating-star--rating
 
 ------------------------------------------------------------------------
 
@@ -313,24 +321,24 @@ This is similar to movies, but with some key differences:
 
 **Show #1:**
 
--   Name: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
--   Genre: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
--   Runtime (minutes): \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
--   Number of episodes: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Name: Something Very Bad Is Going to Happen
+-   Genre: Drama, Horror, Mystery
+-   Runtime (minutes): 50
+-   Number of episodes: 8
 
 **Show #2:**
 
--   Name: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
--   Genre: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
--   Runtime (minutes): \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
--   Number of episodes: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Name: The Pitt
+-   Genre: Drama, Medical
+-   Runtime (minutes): 60
+-   Number of episodes: 15
 
 **Show #3:**
 
--   Name: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
--   Genre: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
--   Runtime (minutes): \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
--   Number of episodes: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+-   Name: The Madison
+-   Genre: Drama, Western
+-   Runtime (minutes): 56
+-   Number of episodes: 6
 
 **Task 6.4:** Add this information to your script using indexing:
 
@@ -347,7 +355,7 @@ tvshows$n_episode[1] <- 9                     # Replace with actual episodes
 
 **Task 7.1:** Why do we use `tvshows$genre[1]` instead of creating a new data frame?
 
-**Your answer:**
+**Your answer:** We already have a tvshows data frame that holds the scraped rank, name, year, and score, so it makes more sense to add the new genre/runtime/n_episode columns directly onto the existing rows. Making a separate data frame would force us to join things back together later and we could easily mismatch the rows. Indexing in with `$` and `[i]` keeps everything lined up with the correct show.
 
 ------------------------------------------------------------------------
 
@@ -355,13 +363,19 @@ tvshows$n_episode[1] <- 9                     # Replace with actual episodes
 
 **Task 7.2:** What does the `[1]` mean in `tvshows$genre[1]`?
 
-**Your answer:**
+**Your answer:** The `[1]` is positional indexing — it points to the first row (first element) of the genre column, which corresponds to the show ranked #1. So `tvshows$genre[1] <- "Drama, Horror, Mystery"` writes that value into the genre cell for the first show only.
 
 ------------------------------------------------------------------------
 
 **Task 7.3:** How would you add information for the 10th show?
 
-**Your answer:**
+**Your answer:** Just swap the index from `[1]` to `[10]`:
+
+```r
+tvshows$genre[10]     <- "Genre here"
+tvshows$runtime[10]   <- 45
+tvshows$n_episode[10] <- 10
+```
 
 ------------------------------------------------------------------------
 
@@ -373,11 +387,11 @@ tvshows$n_episode[1] <- 9                     # Replace with actual episodes
 
 **Task 8.1:** Compare the two scripts. What was easier/harder in the TV shows script?
 
-**Easier in TV shows:**
+**Easier in TV shows:** The same CSS selectors from the movies script (`.ipc-title-link-wrapper .ipc-title__text`, `.cli-title-metadata-item`, `.ipc-rating-star--rating`) worked right out of the box, so I didn't have to hunt for new selectors.
 
 ------------------------------------------------------------------------
 
-**Harder in TV shows:**
+**Harder in TV shows:** The metadata items aren't as uniform — some shows don't have a rating label or are ongoing with `2025–` style years, which breaks the clean "every 3rd item = year" pattern and forces the vectors to be padded to the same length. Manually adding genre/runtime/n_episode for the first three shows by visiting each IMDB page was also more tedious than just scraping.
 
 ------------------------------------------------------------------------
 
@@ -385,7 +399,7 @@ tvshows$n_episode[1] <- 9                     # Replace with actual episodes
 
 **Task 8.2:** Why did we need to use `str_remove_all()` and `str_squish()` for TV show names but not movie titles?
 
-**Your answer:**
+**Your answer:** On the live IMDB TV meter page, show names render with a numbered prefix and extra whitespace/newlines (e.g., `"1. The Pitt\n"`), so `str_remove_all()` strips the leading `"1. "` ranking and `str_squish()` collapses the leftover whitespace. The top 250 movies title column returns clean text in our selector, so no extra cleaning is needed.
 
 ------------------------------------------------------------------------
 
@@ -393,11 +407,11 @@ tvshows$n_episode[1] <- 9                     # Replace with actual episodes
 
 **Task 8.3:** Looking at the complete scripts (`03-imdb-250movies-complete.R` and `04-imdb-tvshows-complete.R`), check your work. Did you get the CSS selectors correct?
 
-**What I got right:**
+**What I got right:** All three selectors matched the complete solution — `.ipc-title-link-wrapper .ipc-title__text` for titles/names, `.cli-title-metadata-item` for years, and `.ipc-rating-star--rating` for ratings/scores. The `seq(1, length(years_raw), by = 3)` trick to grab the year (and skip runtime + rating label) also matched.
 
 ------------------------------------------------------------------------
 
-**What I need to fix:**
+**What I need to fix:** Nothing in the selectors themselves. The only thing I had to revisit was the manually entered info for the first three TV shows (genre, runtime, n_episode) to make sure the numbers matched each show's actual IMDB page.
 
 ------------------------------------------------------------------------
 
@@ -414,36 +428,36 @@ Now that you've scraped both datasets, let's analyze them!
 **Task 9.1:** What decade has the most movies in the top 250?
 
 ```{r decade-analysis}
-imdb_top_250 %>%
+imdb_top_25 %>%
   mutate(decade = floor(year / 10) * 10) %>%
   count(decade, sort = TRUE)
 ```
 
-**Answer:** The \_\_\_\_\_\_s have the most movies in the top 250.
+**Answer:** The 1990s have the most movies in the top 250.
 
 **Task 9.2:** What's the average rating of movies in the top 250?
 
 ```{r avg-rating}
-imdb_top_250 %>%
-  summarise(avg_rating = mean(___))
+imdb_top_25 %>%
+  summarise(avg_rating = mean(rating))
 ```
 
-**Answer:** The average rating is \_\_\_\_\_\_
+**Answer:** The average rating is 8.81
 
 **Task 9.3:** Create a visualization showing ratings over time:
 
 ```{r rating-over-time}
-ggplot(imdb_top_250, aes(x = ___, y = ___)) +
+ggplot(imdb_top_25, aes(x = year, y = rating)) +
   geom_point(alpha = 0.5) +
   geom_smooth() +
   labs(
-    title = "___",
-    x = "___",
-    y = "___"
+    title = "IMDB Top 250 Ratings Over Time",
+    x = "Year of Release",
+    y = "IMDB Rating"
   )
 ```
 
-**What pattern do you see?**
+**What pattern do you see?** Ratings in the top-rated sample stay pretty tightly clustered around 8.8–9.0 across decades, with only a slight dip in the middle years and a small rise toward more recent films. Because every movie in this list is already highly rated, there isn't a strong trend — the takeaway is that "great movies" are spread across every era rather than concentrated in one.
 
 ------------------------------------------------------------------------
 
@@ -459,23 +473,23 @@ ggplot(imdb_top_250, aes(x = ___, y = ___)) +
 nrow(tvshows)
 ```
 
-**Answer:** \_\_\_\_\_\_ shows
+**Answer:** 100 shows
 
 **Task 10.2:** What's the range of years for the TV shows?
 
 ```{r year-range}
 tvshows %>%
   summarise(
-    earliest = min(___, na.rm = TRUE),
-    latest = max(___, na.rm = TRUE)
+    earliest = min(year, na.rm = TRUE),
+    latest = max(year, na.rm = TRUE)
   )
 ```
 
-**Answer:** From \_\_\_\_\_ to \_\_\_\_\_
+**Answer:** From 1994 to 2026
 
 **Task 10.3:** Based on the 3 shows where you added genre information, what genres seem popular?
 
-**Your answer:**
+**Your answer:** Drama shows up in every one of the top 3 (Drama/Horror/Mystery, Drama/Medical, Drama/Western), so Drama is clearly the dominant genre on the popularity chart. The sub-genres are all different, which suggests viewers are drawn to serious, character-driven stories rather than one specific sub-genre.
 
 ------------------------------------------------------------------------
 
@@ -489,7 +503,7 @@ tvshows %>%
 
 **Task 11.1:** What was the most challenging part of this exercise?
 
-**Your answer:**
+**Your answer:** Figuring out that the three `.cli-title-metadata-item` spans represent year, runtime/episode count, and rating label in that order — and then using `seq(1, length(years_raw), by = 3)` to pull only the years out. It also took some trial and error to realize IMDB blocks live scraping from cloud/JupyterHub environments, which is why we use a locally saved HTML file.
 
 ------------------------------------------------------------------------
 
@@ -499,7 +513,7 @@ tvshows %>%
 
 **Hint:** Try visiting <https://www.imdb.com/robots.txt>
 
-**Your answer:**
+**Your answer:** `robots.txt` is how a site tells automated clients which paths they're allowed to crawl and which they aren't. Checking it before scraping is both a legal/ethical signal (you're respecting the site's stated rules) and a practical one (pages blocked by `robots.txt` may also be rate-limited or served differently to bots). Ignoring it can get your IP blocked or put you on the wrong side of the site's Terms of Service.
 
 ------------------------------------------------------------------------
 
@@ -507,7 +521,7 @@ tvshows %>%
 
 **Task 11.3:** What are some situations where web scraping might NOT be appropriate or legal?
 
-**Your answer:**
+**Your answer:** Scraping is questionable when the site's Terms of Service forbid it, when the data is behind a login or paywall, when it includes personal/private information (PII), when it's copyrighted content you intend to republish, or when you're hitting the site fast enough to affect its availability. Scraping for commercial resale of someone else's data, or to get around an official paid API, is also a red flag.
 
 ------------------------------------------------------------------------
 
@@ -517,7 +531,7 @@ tvshows %>%
 
 **Task 11.4:** If IMDB changed their website design tomorrow, what would happen to your scraping code?
 
-**Your answer:**
+**Your answer:** The code would most likely break. Our selectors (`.ipc-title-link-wrapper .ipc-title__text`, `.cli-title-metadata-item`, `.ipc-rating-star--rating`) are tied to specific class names in IMDB's current HTML — if they rename those classes or restructure the page, `html_nodes()` would return empty vectors or the wrong elements, and the data frame would end up empty or full of NAs. That's one of the main fragility problems with scraping.
 
 ------------------------------------------------------------------------
 
@@ -525,7 +539,7 @@ tvshows %>%
 
 **Task 11.5:** Why might an API (Application Programming Interface) be preferable to web scraping?
 
-**Your answer:**
+**Your answer:** An API gives you structured, documented data (usually JSON) that won't silently change shape when the front-end gets redesigned. It's also officially supported, typically faster, and usually comes with clear rate limits and authentication instead of the guesswork involved in scraping. In short: APIs are built to be consumed by code, while HTML pages are built to be viewed by humans.
 
 ------------------------------------------------------------------------
 
@@ -543,21 +557,28 @@ tvshows %>%
 
 **Task 12.1:** Choose a movie and visit its IMDB page. What additional information is available?
 
-**Movie chosen:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+**Movie chosen:** The Shawshank Redemption
 
-**Additional info available:** (Director, Cast, Runtime, Budget, etc.)
+**Additional info available:** (Director, Cast, Runtime, Budget, etc.) Director (Frank Darabont), writers, top-billed cast, runtime (142 min), genre tags (Drama), MPAA rating (R), release date, budget, gross, user reviews, and plot summary.
 
 ------------------------------------------------------------------------
 
 **Task 12.2:** Write code to scrape at least one additional piece of information:
 
 ```{r challenge-scrape}
-# Your code here
+movie_page <- read_html("https://www.imdb.com/title/tt0111161/")
+
+director <- movie_page %>%
+  html_nodes("a.ipc-metadata-list-item__list-content-item--link") %>%
+  html_text() %>%
+  .[1]
+
+director
 ```
 
 **Task 12.3:** What CSS selector(s) did you use?
 
-**Your answer:**
+**Your answer:** `a.ipc-metadata-list-item__list-content-item--link` — this selects the linked items inside IMDB's metadata list (director, writers, stars). I indexed `[1]` to grab the director, which is the first entry in that list.
 
 ------------------------------------------------------------------------
 

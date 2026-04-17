@@ -1,74 +1,83 @@
-## Scrape the list of most popular TV shows from https://www.imdb.com/chart/tvmeter
+## Scrape popular TV shows from a locally saved IMDB TV Meter page
+## COMPLETE SOLUTION
+##
+## BEFORE YOU RUN THIS SCRIPT — save the HTML page first:
+##
+##   1. Open https://www.imdb.com/chart/tvmeter in Chrome or Firefox
+##   2. Wait for the full page to load (scroll down a bit if needed)
+##   3. Press Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+##   4. In the Save dialog:
+##        - Set "Save as type" to "Webpage, Complete" (Chrome)
+##          or "Web Page, complete" (Firefox)
+##        - Name the file:  imdb-tvmeter.html
+##        - Save it into your AE 07 folder
+##   5. Come back here and run the script
+##
+## Why? IMDB blocks automated requests from cloud environments like JupyterHub.
 
-# load packages ----------------------------------------------------------------
+# Load packages ----------------------------------------------------------------
 
 #library(tidyverse)
 #library(rvest)
+
+# Read local html page ---------------------------------------------------------
+
+#page <- read_html("imdb-tvmeter.html")
+
+# Years ------------------------------------------------------------------------
+
+#years_raw <- page %>%
+#  html_nodes(".cli-title-metadata-item") %>%
+#  html_text()
 #
-## read in http://www.imdb.com/chart/tvmeter ------------------------------------
-#
-#page <- read_html("https://www.imdb.com/chart/tvmeter")
-#
-## years ------------------------------------------------------------------------
-#
-#years <- page %>%
-#  html_nodes("a+ .secondaryInfo") %>%
-#  html_text() %>%
-#  str_remove("\\(") %>%
-#  str_remove("\\)") %>%
+#years <- years_raw[seq(1, length(years_raw), by = 3)] %>%
 #  as.numeric()
-#
-## scores -----------------------------------------------------------------------
-#
+
+# Scores -----------------------------------------------------------------------
+
 #scores <- page %>%
-#  html_nodes(".imdbRating") %>%
+#  html_nodes(".ipc-rating-star--rating") %>%
 #  html_text() %>%
 #  as.numeric()
-#
-## names ------------------------------------------------------------------------
-#
+
+# Names ------------------------------------------------------------------------
+
 #names <- page %>%
-#  html_nodes(".titleColumn") %>%
-#  html_text() %>%
-#  str_remove_all("\n") %>%
-#  str_squish()
-#
-## tvshows dataframe ------------------------------------------------------------
-#
+#  html_nodes(".ipc-title-link-wrapper .ipc-title__text") %>%
+#  html_text()
+
+# TV shows dataframe -----------------------------------------------------------
+
 #tvshows <- tibble(
-#  rank = 1:100,
-#  name = names,
-#  year = years,
+#  rank  = 1:length(names),
+#  name  = names,
+#  year  = years,
 #  score = scores
 #)
-#
-#tvshows <- tvshows %>%
-#  separate(col = name, into = c("name", "other_info"), sep = " \\(", extra = "merge") %>%
-#  select(-other_info)
-#
-## add new variables ------------------------------------------------------------
-#
+
+# Add new variables ------------------------------------------------------------
+
 #tvshows <- tvshows %>%
 #  mutate(
-#    genre = NA,
-#    runtime = NA,
+#    genre     = NA,
+#    runtime   = NA,
 #    n_episode = NA,
 #  )
-#
-## add new info for first show --------------------------------------------------
-#
-#tvshows$genre[1] <- "Drama, Horror, Mystery"
-#tvshows$runtime[1] <- 494
+
+# Add new info for first show --------------------------------------------------
+
+#tvshows$genre[1]     <- "Drama, Horror, Mystery"
+#tvshows$runtime[1]   <- 494
 #tvshows$n_episode[1] <- 9
-#
-## add new info for second show --------------------------------------------------
-#
-#tvshows$genre[2] <- "Action, Comedy, Crime"
-#tvshows$runtime[2] <- 60
+
+# Add new info for second show -------------------------------------------------
+
+#tvshows$genre[2]     <- "Action, Comedy, Crime"
+#tvshows$runtime[2]   <- 60
 #tvshows$n_episode[2] <- 17
-#
-## add new info for third show --------------------------------------------------
-#
-#tvshows$genre[3] <- "__"
-#tvshows$runtime[3] <- ___
+
+# Add new info for third show --------------------------------------------------
+
+#tvshows$genre[3]     <- "__"
+#tvshows$runtime[3]   <- ___
 #tvshows$n_episode[3] <- ___
